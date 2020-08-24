@@ -1,24 +1,24 @@
 import { Cliente } from "./Cliente.js";
+
 export class Conta {
 
-    _agencia;
-    _numero;
-    _saldo = 0;
-    _cliente;
-    static _numeroDeContas = 0
-
     constructor(agencia, cliente) {
-        Conta._numeroDeContas++;
+        if (this.constructor == Conta) throw new Error('Esta classe é Abstrata');
+        if (!(cliente instanceof Cliente)) throw new Error('Deve sempre receber uma instância da classe Cliente');
         this._agencia = agencia;
-        this._numero = Conta._numeroDeContas;
         this._cliente = cliente;
+        this._saldo = 0;
+
     }
 
-
     sacar(valor) {
+        throw new Error("Este método é abstrato");
+    }
+
+    _sacar(valor, taxa) {
         if (valor <= 0) return;
-        if (this._saldo < valor) return;
-        this._saldo -= valor;
+        if (this._saldo < valor * taxa) return;
+        this._saldo -= valor * taxa;
         return valor;
     }
 
@@ -28,7 +28,7 @@ export class Conta {
     }
 
     transferir(valor, conta) {
-        const valorSacado = this.sacar(valor);
+        const valorSacado = this._sacar(valor, 1);
         if (valorSacado != undefined) conta.depositar(valorSacado); // Porque aqui não funciona com typeof?  
         return
     }
@@ -56,6 +56,13 @@ export class Conta {
     }
 
     //seters
+
+    set cliente(cliente) {
+
+        if (!(cliente instanceof Cliente)) return;
+        this._cliente = cliente;
+
+    }
     set agencia(agencia) {
 
         if (typeof this._agencia != undefined) {
@@ -65,13 +72,4 @@ export class Conta {
         this._agencia = agencia;
     }
 
-    set cliente(cliente) {
-        if (!(cliente instanceof Cliente)) return
-
-        if (this._cliente != undefined) { // Porque aqui não funciona com typeof?
-            console.log("\x1b[31m", `Cliente já está definido: ${JSON.stringify(this._cliente)} \n`, "\x1b[0m");
-            return;
-        }
-        this._cliente = cliente;
-    }
 }
